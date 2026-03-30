@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type {
   AgentsStatusResponse,
   AnalyzeResponse,
+  LogEntry,
   SessionEntry,
   TaskGraph,
   TaskResult,
@@ -31,11 +32,20 @@ interface WorkspaceState {
   // Agent health
   agentsStatus: AgentsStatusResponse | null;
 
+  // Logs panel
+  logsOpen: boolean;
+  toggleLogs: () => void;
+
   // Dataset panel
   datasetPanelOpen: boolean;
   datasetPanelContextId: string | null;
   openDatasetPanel: (contextId: string) => void;
   closeDatasetPanel: () => void;
+
+  // Logs
+  logs: LogEntry[];
+  addLog: (entry: Omit<LogEntry, "id">) => void;
+  clearLogs: () => void;
 
   // Actions
   setContextId: (id: string) => void;
@@ -69,10 +79,22 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
       agentsStatus: null,
 
+      logs: [],
+      logsOpen: false,
+
       datasetPanelOpen: false,
       datasetPanelContextId: null,
       openDatasetPanel: (contextId) => set({ datasetPanelOpen: true, datasetPanelContextId: contextId }),
       closeDatasetPanel: () => set({ datasetPanelOpen: false }),
+
+      addLog: (entry) =>
+        set((s) => ({
+          logs: [...s.logs, { ...entry, id: `${Date.now()}-${Math.random()}` }],
+        })),
+
+      clearLogs: () => set({ logs: [] }),
+
+      toggleLogs: () => set((s) => ({ logsOpen: !s.logsOpen })),
 
       setContextId: (id) => set({ contextId: id, sessionId: null }),
       setSessionId: (id) => set({ sessionId: id }),
@@ -88,6 +110,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           results: [],
           finalResponse: null,
           errorMessage: null,
+          logs: [],
         }),
 
       setPlan: (intent, graph) => {
@@ -136,6 +159,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           results: [],
           finalResponse: null,
           errorMessage: null,
+          logs: [],
         }),
 
       loadSession: (entry) =>

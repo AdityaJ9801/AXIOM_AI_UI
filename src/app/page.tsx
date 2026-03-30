@@ -4,6 +4,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import MainWorkspace from "@/components/layout/MainWorkspace";
 import DatasetPanel from "@/components/panels/DatasetPanel";
 import ResizeHandle from "@/components/layout/ResizeHandle";
+import LiveLogsPanel from "@/components/interactive/LiveLogsPanel";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
 const SIDEBAR_MIN = 200;
@@ -40,6 +41,7 @@ export default function Home() {
       {/* Main workspace — fills remaining space */}
       <main className="flex flex-col flex-1 min-w-0 min-h-0">
         <MainWorkspace />
+        <LiveLogsPanel />
       </main>
 
       {/* Dataset panel resize handle — only when panel is open */}

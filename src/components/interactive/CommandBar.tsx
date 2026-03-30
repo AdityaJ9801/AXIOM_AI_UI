@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Sparkles } from "lucide-react";
+import { Send, Square, Sparkles } from "lucide-react";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import { useOrchestratorSSE } from "@/hooks/useOrchestratorSSE";
 import clsx from "clsx";
@@ -18,7 +18,7 @@ export default function CommandBar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { phase } = useWorkspaceStore();
-  const { submit } = useOrchestratorSSE();
+  const { submit, cancel } = useOrchestratorSSE();
   const isRunning = phase === "planning" || phase === "executing";
 
   useEffect(() => {
@@ -122,17 +122,29 @@ export default function CommandBar() {
         />
 
         <button
-          onClick={handleSubmit}
-          disabled={!query.trim() || isRunning}
+          onClick={isRunning ? cancel : handleSubmit}
+          disabled={!isRunning && !query.trim()}
           className={clsx(
             "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
-            query.trim() && !isRunning
+            isRunning
+              ? "bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/30"
+              : query.trim()
               ? "bg-cyan-500 hover:bg-cyan-400 text-black shadow-lg shadow-cyan-500/30"
               : "cursor-not-allowed"
           )}
-          style={!query.trim() || isRunning ? { background: "var(--bg-elevated)", color: "var(--text-faint)" } : {}}
+          style={!isRunning && !query.trim() ? { background: "var(--bg-elevated)", color: "var(--text-faint)" } : {}}
+          title={isRunning ? "Stop analysis" : "Submit"}
         >
-          {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          {isRunning ? (
+            <motion.div
+              animate={{ scale: [1, 0.85, 1] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+            </motion.div>
+          ) : (
+            <Send className="w-4 h-4" />
+          )}
         </button>
       </motion.div>
 

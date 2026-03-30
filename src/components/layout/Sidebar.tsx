@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Activity, Plus } from "lucide-react";
+import { Clock, Activity, Plus, Terminal } from "lucide-react";
 import { toast } from "sonner";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import type { AgentHealthInfo } from "@/types/axiom";
@@ -51,7 +51,7 @@ function formatDate(iso: string) {
 }
 
 export default function Sidebar({ width }: { width: number }) {
-  const { sessionHistory, loadSession, resetWorkspace, agentsStatus, setAgentsStatus } = useWorkspaceStore();
+  const { sessionHistory, loadSession, resetWorkspace, agentsStatus, setAgentsStatus, logs, logsOpen, toggleLogs } = useWorkspaceStore();
 
   useEffect(() => {
     async function fetchStatus() {
@@ -133,6 +133,33 @@ export default function Sidebar({ width }: { width: number }) {
             </div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Logs toggle button */}
+      <div className="px-4 py-3" style={{ borderTop: "1px solid var(--border)" }}>
+        <button
+          onClick={toggleLogs}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-xs font-medium"
+          style={{
+            background: logsOpen ? "rgba(6,182,212,0.1)" : "var(--bg-elevated)",
+            border: `1px solid ${logsOpen ? "rgba(6,182,212,0.4)" : "var(--border)"}`,
+            color: logsOpen ? "#06b6d4" : "var(--text-muted)",
+          }}
+        >
+          <Terminal className="w-3.5 h-3.5" />
+          <span>Logs</span>
+          {logs.length > 0 && (
+            <span
+              className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded-full"
+              style={{
+                background: logsOpen ? "rgba(6,182,212,0.2)" : "var(--bg-surface)",
+                color: logsOpen ? "#06b6d4" : "var(--text-faint)",
+              }}
+            >
+              {logs.length}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Agent health */}

@@ -1,7 +1,7 @@
 # AXIOM AI — Frontend
 
 > Production-ready UI for the **AXIOM AI Orchestrator** — a multi-agent data analysis platform.
-> Upload your dataset, ask a question in plain English, and watch AI agents plan, execute, and visualize results in real time.
+> Upload a dataset, ask a question in plain English, and watch AI agents plan, execute, and visualize results in real time.
 
 ---
 
@@ -14,24 +14,31 @@
 
 ## Features
 
-### Core Workspace
-- **Real-time SSE Streaming** — connects to `/analyze/stream`, parses `plan`, `task_start`, `task_complete`, `result`, and `error` events live
-- **Live Execution Graph** — animated React Flow DAG that lights up as each agent task starts and completes
-- **Smart Result Widgets** — SQL → sortable/paginated table, viz → bar/line/scatter chart, NLP/report → formatted Markdown
-- **Session History** — previous queries saved locally, resumable with one click
+### Real-time Execution
+- **SSE Streaming** — connects to `/analyze/stream`, handles `plan`, `task_start`, `task_complete`, `result`, and `error` events live
+- **Animated Execution Graph** — React Flow DAG with per-node state: pending (faded), running (glowing pulse + progress bar), completed (green flash), failed (red glow). Edges animate when data flows between nodes
+- **Parallel DAG layout** — topological layer algorithm spaces parallel branches correctly, auto-fits to any graph size
+- **Clickable Nodes** — click any node to open a side panel showing agent name, task description, payload, result preview, error, and timing
+
+### Live Logs Terminal
+- **VS Code-style bottom panel** — slides up from the bottom of the workspace, just like VS Code's terminal
+- **Sidebar toggle** — "Logs" button in the left sidebar opens/closes the panel, shows live event count badge
+- **Terminal output** — monospace font, color-coded rows by level (`SYS`, `INFO`, `OK`, `WARN`, `ERR`), agent badges, timestamps to millisecond precision, duration column
+- **Drag to resize** — drag the top edge to set panel height (120px – 600px)
+- **Auto-scroll** — follows latest log; detects manual scroll-up and shows "↓ jump to latest" hint
+- **Stop analysis** — red Stop button replaces Send while a query is running; aborts the SSE stream instantly via `AbortController`
 
 ### Dataset Management
-- **Drag & Drop Upload** — CSV, JSON, XLSX up to 50MB
-- **Dataset Panel** — full-page right-side explorer with two tabs:
-  - **Data tab** — paginated table with column visibility toggles, client-side search, sort on any column
-  - **Profile tab** — per-column stats: dtype badge, null % progress bar, unique count, min/avg/max for numbers, top-3 values for text
-- **Column Profiling** — auto-computed on upload (dtype detection, null %, unique count, numeric stats)
+- **Drag & Drop Upload** — CSV, JSON, XLSX up to 50 MB
+- **Dataset Panel** — resizable right-side panel with two tabs:
+  - **Data** — paginated table, column visibility toggles, client-side search, sortable columns
+  - **Profile** — per-column stats: dtype badge, null % bar, unique count, min/avg/max for numbers, top-3 values for text
 
-### UI/UX
-- **Resizable Panels** — drag the handle between sidebar ↔ workspace, and workspace ↔ dataset panel to any width you want
-- **Light / Dark Mode** — toggle in the sidebar header, persists across sessions
-- **Toast Notifications** — success, error, info, warning toasts replace all inline error states
-- **Agent Health Monitor** — live pulsing dots showing all 6 downstream agents' status + latency
+### UI / UX
+- **Resizable panels** — drag handles between sidebar ↔ workspace and workspace ↔ dataset panel
+- **Light / Dark mode** — toggle in sidebar header, persists across sessions
+- **Toast notifications** — auto-dismiss after 3 s; no persistent loading toasts
+- **Agent Health Monitor** — pulsing dots for all 6 downstream agents with latency, polled every 30 s
 
 ---
 
@@ -57,34 +64,24 @@
 ## Prerequisites
 
 - Node.js 18+
-- The [AXIOM AI Orchestrator backend](https://github.com/VinitHudiya19/AXIOM_AI_UI) running on port `8000`
+- [AXIOM AI Orchestrator backend](https://github.com/VinitHudiya19/AXIOM_AI_UI) running on port `8000`
 
 ---
 
 ## Quick Start
 
-**1. Clone**
 ```bash
+# 1. Clone
 git clone https://github.com/VinitHudiya19/AXIOM_AI_UI.git
 cd AXIOM_AI_UI
-```
 
-**2. Install**
-```bash
+# 2. Install
 npm install
-```
 
-**3. Configure backend URL**
+# 3. Configure
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
 
-Create `.env.local` in the root:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-Replace `localhost` with your backend's IP or domain if it's on a different machine.
-
-**4. Run**
-```bash
+# 4. Run
 npm run dev
 ```
 
@@ -98,21 +95,19 @@ Run the orchestrator locally with mock agents — no LLM or Docker needed:
 
 ```bash
 # In the orchestrator repo root
-pip install -r requirements.txt
-pip install -e .
+pip install -r requirements.txt && pip install -e .
 
 # Terminal 1 — 6 mock agents on ports 8001–8006
 python stubs/run_stubs.py
 
-# Terminal 2 — orchestrator (Windows)
-set ENV_FILE=.env.stub
-python -m uvicorn app.main:app --port 8000 --reload
-
-# Terminal 2 — orchestrator (Linux/macOS)
+# Terminal 2 — orchestrator
+# Windows:
+set ENV_FILE=.env.stub && python -m uvicorn app.main:app --port 8000 --reload
+# Linux/macOS:
 ENV_FILE=.env.stub uvicorn app.main:app --port 8000 --reload
 ```
 
-Once running, the sidebar agent health dots will turn green.
+Once running, the sidebar agent health dots turn green.
 
 ---
 
@@ -120,7 +115,7 @@ Once running, the sidebar agent health dots will turn green.
 
 | Variable | Default | Description |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | AXIOM AI Orchestrator backend URL |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Orchestrator backend URL |
 
 ---
 
@@ -130,32 +125,33 @@ Once running, the sidebar agent health dots will turn green.
 src/
 ├── app/
 │   ├── layout.tsx              # Root layout, fonts, ThemeProvider, Toaster
-│   ├── page.tsx                # Entry — resizable 3-panel layout
-│   └── globals.css             # CSS variables (dark + light themes), scrollbar
+│   ├── page.tsx                # Entry — resizable 3-panel layout + logs terminal
+│   └── globals.css             # CSS variables (dark + light themes)
 ├── components/
 │   ├── layout/
-│   │   ├── Sidebar.tsx         # Datasets, session history, agent health, theme toggle
+│   │   ├── Sidebar.tsx         # Datasets, history, agent health, logs toggle
 │   │   ├── MainWorkspace.tsx   # Canvas + sticky command bar
-│   │   └── ResizeHandle.tsx    # Drag-to-resize handle between panels
+│   │   └── ResizeHandle.tsx    # Drag-to-resize handle
 │   ├── interactive/
-│   │   ├── CommandBar.tsx      # Natural language input with suggestions
+│   │   ├── CommandBar.tsx      # Query input with Stop button + suggestions
 │   │   ├── DatasetUploader.tsx # Drag-and-drop upload + dataset card list
-│   │   ├── ExecutionGraph.tsx  # Animated React Flow DAG
-│   │   ├── PlanningState.tsx   # Loading dots during planning phase
-│   │   └── ThemeToggle.tsx     # Sun/moon toggle button
+│   │   ├── ExecutionGraph.tsx  # Animated React Flow DAG with node detail panel
+│   │   ├── LiveLogsPanel.tsx   # VS Code-style bottom terminal panel
+│   │   ├── PlanningState.tsx   # Loading indicator during planning phase
+│   │   └── ThemeToggle.tsx     # Sun/moon toggle
 │   ├── panels/
 │   │   └── DatasetPanel.tsx    # Right-side resizable panel (Data + Profile tabs)
 │   ├── providers/
 │   │   └── ThemeProvider.tsx   # next-themes wrapper
 │   └── widgets/
-│       ├── ResultsPanel.tsx    # Orchestrates which widget to render per agent
+│       ├── ResultsPanel.tsx    # Routes results to the correct widget
 │       ├── DataTableWidget.tsx # TanStack Table for SQL results
 │       ├── ChartWidget.tsx     # Recharts for viz results
 │       └── MarkdownReport.tsx  # GFM markdown for report/NLP results
 ├── hooks/
-│   └── useOrchestratorSSE.ts  # SSE streaming hook for /analyze/stream
+│   └── useOrchestratorSSE.ts  # SSE hook — submit, cancel, AbortController
 ├── store/
-│   └── useWorkspaceStore.ts   # Zustand store (session, context, panel state)
+│   └── useWorkspaceStore.ts   # Zustand store — phase, graph, logs, panel state
 └── types/
     └── axiom.ts               # TypeScript types mirroring backend Pydantic models
 ```
@@ -165,21 +161,20 @@ src/
 ## How it works
 
 ```
-User uploads CSV/JSON/XLSX
+User uploads CSV / JSON / XLSX
         ↓
-Backend computes column profiles (dtype, nulls, unique, min/max/mean)
-        ↓
-User opens Dataset Panel → explores Data tab (paginated table) or Profile tab (column stats)
+Backend computes column profiles
         ↓
 User types a query → POST /analyze/stream
         ↓
-SSE events arrive:
-  plan         → execution graph animates into view
-  task_start   → graph node pulses cyan
-  task_complete → node turns green, shows duration
-  result       → widgets render (table / chart / markdown)
+SSE events:
+  plan          → execution graph animates in, logs panel opens
+  task_start    → node glows cyan, log row: INFO
+  task_complete → node turns green (or red), log row: OK / ERR
+  result        → widgets render (table / chart / markdown)
         ↓
-Toast notification: "Analysis complete"
+User can click any graph node → side panel shows payload + result + timing
+User can open Logs panel → full terminal history of every event
 ```
 
 ---

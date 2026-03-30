@@ -125,3 +125,16 @@ export interface SessionEntry {
   created_at: string;
   context_id: string;
 }
+
+// Live logs
+export type LogLevel = "info" | "success" | "error" | "warn" | "system";
+
+export interface LogEntry {
+  id: string;
+  timestamp: string;   // ISO string
+  level: LogLevel;
+  agent?: AgentName;
+  event: string;       // short event type label
+  message: string;
+  duration_ms?: number | null;
+}
