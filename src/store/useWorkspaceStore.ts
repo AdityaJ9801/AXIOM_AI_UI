@@ -31,6 +31,12 @@ interface WorkspaceState {
   // Agent health
   agentsStatus: AgentsStatusResponse | null;
 
+  // Dataset panel
+  datasetPanelOpen: boolean;
+  datasetPanelContextId: string | null;
+  openDatasetPanel: (contextId: string) => void;
+  closeDatasetPanel: () => void;
+
   // Actions
   setContextId: (id: string) => void;
   setSessionId: (id: string | null) => void;
@@ -62,6 +68,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       errorMessage: null,
 
       agentsStatus: null,
+
+      datasetPanelOpen: false,
+      datasetPanelContextId: null,
+      openDatasetPanel: (contextId) => set({ datasetPanelOpen: true, datasetPanelContextId: contextId }),
+      closeDatasetPanel: () => set({ datasetPanelOpen: false }),
 
       setContextId: (id) => set({ contextId: id, sessionId: null }),
       setSessionId: (id) => set({ sessionId: id }),

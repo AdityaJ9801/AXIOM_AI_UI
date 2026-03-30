@@ -93,6 +93,18 @@ export type SSEEvent =
   | SSEErrorEvent;
 
 // Dataset upload
+export interface ColumnProfile {
+  name: string;
+  dtype: "number" | "text" | "date" | "boolean";
+  null_count: number;
+  null_pct: number;
+  unique_count: number;
+  min_val: number | null;
+  max_val: number | null;
+  mean_val: number | null;
+  top_values: string[] | null;
+}
+
 export interface DatasetMeta {
   context_id: string;
   filename: string;
@@ -102,6 +114,7 @@ export interface DatasetMeta {
   preview: Record<string, unknown>[];
   size_bytes: number;
   uploaded_at: string;
+  column_profiles: ColumnProfile[];
 }
 
 // Session history entry stored locally

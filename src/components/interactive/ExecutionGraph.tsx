@@ -75,11 +75,11 @@ function TaskNodeComponent({ data }: { data: { task: TaskNode; status: TaskStatu
         <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: colors.text }}>
           {task.agent}
         </span>
-        <span className="text-xs text-zinc-600 ml-auto font-mono">{task.task_id}</span>
+        <span className="text-xs font-mono ml-auto" style={{ color: "var(--text-faint)" }}>{task.task_id}</span>
       </div>
-      <p className="text-xs text-zinc-400 leading-tight line-clamp-2">{task.description}</p>
+      <p className="text-xs leading-tight line-clamp-2" style={{ color: "var(--text-secondary)" }}>{task.description}</p>
       {duration != null && (
-        <p className="text-xs text-zinc-600 mt-1 font-mono">{duration.toFixed(0)}ms</p>
+        <p className="text-xs mt-1 font-mono" style={{ color: "var(--text-faint)" }}>{duration.toFixed(0)}ms</p>
       )}
     </motion.div>
   );
@@ -205,14 +205,18 @@ export default function ExecutionGraph() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full rounded-2xl border border-zinc-800 overflow-hidden bg-zinc-950"
-      style={{ height: Math.max(280, (graph?.tasks.length ?? 1) * 60 + 80) }}
+      className="w-full rounded-2xl overflow-hidden"
+      style={{
+        height: Math.max(280, (graph?.tasks.length ?? 1) * 60 + 80),
+        border: "1px solid var(--border)",
+        background: "var(--bg-surface)",
+      }}
     >
-      <div className="px-4 py-2.5 border-b border-zinc-800 flex items-center gap-2">
+      <div className="px-4 py-2.5 flex items-center gap-2" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-        <span className="text-xs font-medium text-zinc-400">Execution Graph</span>
+        <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Execution Graph</span>
         {graph && (
-          <span className="text-xs text-zinc-600 ml-auto font-mono">
+          <span className="text-xs ml-auto font-mono" style={{ color: "var(--text-faint)" }}>
             {graph.tasks.length} tasks
           </span>
         )}
@@ -227,10 +231,9 @@ export default function ExecutionGraph() {
         fitView
         fitViewOptions={{ padding: 0.3 }}
         proOptions={{ hideAttribution: true }}
-        className="bg-zinc-950"
       >
-        <Background color="#27272a" gap={20} size={1} />
-        <Controls className="!bg-zinc-900 !border-zinc-700 !shadow-none" />
+        <Background color="var(--border)" gap={20} size={1} />
+        <Controls className="!shadow-none" />
       </ReactFlow>
     </motion.div>
   );

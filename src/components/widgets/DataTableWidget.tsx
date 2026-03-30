@@ -56,29 +56,30 @@ export default function DataTableWidget({ data }: DataTableWidgetProps) {
   });
 
   if (rows.length === 0) {
-    return <p className="text-sm text-zinc-500 py-4 text-center">No tabular data returned.</p>;
+    return <p className="text-sm py-4 text-center" style={{ color: "var(--text-muted)" }}>No tabular data returned.</p>;
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-800">
+    <div className="overflow-hidden rounded-xl" style={{ border: "1px solid var(--border)" }}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id} className="border-b border-zinc-800 bg-zinc-900/60">
+              <tr key={hg.id} style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
                     className={clsx(
-                      "px-4 py-2.5 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider whitespace-nowrap",
-                      header.column.getCanSort() && "cursor-pointer hover:text-zinc-200 select-none"
+                      "px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap",
+                      header.column.getCanSort() && "cursor-pointer select-none"
                     )}
+                    style={{ color: "var(--text-secondary)" }}
                   >
                     <div className="flex items-center gap-1">
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getCanSort() && (
-                        <span className="text-zinc-600">
+                        <span style={{ color: "var(--text-faint)" }}>
                           {header.column.getIsSorted() === "asc" ? (
                             <ChevronUp className="w-3 h-3" />
                           ) : header.column.getIsSorted() === "desc" ? (
@@ -98,13 +99,15 @@ export default function DataTableWidget({ data }: DataTableWidgetProps) {
             {table.getRowModel().rows.map((row, i) => (
               <tr
                 key={row.id}
-                className={clsx(
-                  "border-b border-zinc-800/50 transition-colors hover:bg-zinc-800/30",
-                  i % 2 === 0 ? "bg-transparent" : "bg-zinc-900/20"
-                )}
+                className="transition-colors"
+                style={{
+                  borderBottom: "1px solid var(--border-subtle)",
+                  background: i % 2 === 0 ? "transparent" : "var(--bg-elevated)",
+                }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-2.5 text-zinc-300 font-mono text-xs whitespace-nowrap">
+                  <td key={cell.id} className="px-4 py-2.5 font-mono text-xs whitespace-nowrap"
+                    style={{ color: "var(--text-secondary)" }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -114,25 +117,19 @@ export default function DataTableWidget({ data }: DataTableWidgetProps) {
         </table>
       </div>
 
-      {/* Pagination */}
       {table.getPageCount() > 1 && (
-        <div className="flex items-center justify-between px-4 py-2.5 border-t border-zinc-800 bg-zinc-900/40">
-          <span className="text-xs text-zinc-500">
+        <div className="flex items-center justify-between px-4 py-2.5"
+          style={{ borderTop: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
             {rows.length} rows · page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
           </span>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className="p-1 rounded hover:bg-zinc-700 disabled:opacity-30 text-zinc-400"
-            >
+            <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}
+              className="p-1 rounded disabled:opacity-30" style={{ color: "var(--text-secondary)" }}>
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              className="p-1 rounded hover:bg-zinc-700 disabled:opacity-30 text-zinc-400"
-            >
+            <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}
+              className="p-1 rounded disabled:opacity-30" style={{ color: "var(--text-secondary)" }}>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>

@@ -14,8 +14,10 @@ function EmptyState() {
         <Sparkles className="w-8 h-8 text-cyan-400" />
       </div>
       <div>
-        <h2 className="text-xl font-semibold text-zinc-200 mb-2">AXIOM AI Workspace</h2>
-        <p className="text-sm text-zinc-500 max-w-sm leading-relaxed">
+        <h2 className="text-xl font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
+          AXIOM AI Workspace
+        </h2>
+        <p className="text-sm max-w-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
           Ask a natural language question about your data. The orchestrator will plan, execute, and visualize the results in real time.
         </p>
       </div>
@@ -28,7 +30,13 @@ function EmptyState() {
         ].map((hint) => (
           <div
             key={hint}
-            className="px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900/40 text-xs text-zinc-500 text-left"
+            className="px-3 py-2 rounded-lg text-xs text-left cursor-default"
+            style={{
+              border: "1px solid var(--border)",
+              background: "var(--bg-surface)",
+              color: "var(--text-muted)",
+              boxShadow: "var(--shadow-sm)",
+            }}
           >
             {hint}
           </div>
@@ -45,7 +53,6 @@ export default function MainWorkspace() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <AnimatePresence mode="wait">
           {showEmpty ? (
@@ -63,7 +70,10 @@ export default function MainWorkspace() {
       </div>
 
       {/* Sticky command bar */}
-      <div className="border-t border-zinc-800 bg-zinc-950/80 backdrop-blur-sm">
+      <div
+        className="backdrop-blur-sm"
+        style={{ borderTop: "1px solid var(--border)", background: "color-mix(in srgb, var(--bg-base) 80%, transparent)" }}
+      >
         <div className="max-w-4xl mx-auto">
           <CommandBar />
         </div>

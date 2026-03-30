@@ -1,5 +1,6 @@
 "use client";
 import { useCallback } from "react";
+import { toast } from "sonner";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import type { SSEEvent } from "@/types/axiom";
 
@@ -12,6 +13,7 @@ export function useOrchestratorSSE() {
   const submit = useCallback(
     async (query: string) => {
       startAnalysis(query);
+      const toastId = toast.loading("Planning analysis…", { description: query.slice(0, 80) });
 
       try {
         const res = await fetch(`${API_BASE}/analyze/stream`, {
@@ -26,7 +28,9 @@ export function useOrchestratorSSE() {
 
         if (!res.ok || !res.body) {
           const text = await res.text().catch(() => "Unknown error");
-          setError(`Server error ${res.status}: ${text}`);
+          const msg = `Server error ${res.status}: ${text}`;
+          setError(msg);
+          toast.error("Analysis failed", { id: toastId, description: msg });
           return;
         }
 
@@ -51,7 +55,7 @@ export function useOrchestratorSSE() {
               try {
                 const payload = JSON.parse(raw);
                 const evt = { event: currentEvent, data: payload } as SSEEvent;
-                handleEvent(evt, { setPlan, updateTaskStatus, setResult, setError });
+                handleEvent(evt, { setPlan, updateTaskStatus, setResult, setError, toastId });
               } catch {
                 // malformed JSON — skip
               }
@@ -62,6 +66,7 @@ export function useOrchestratorSSE() {
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         setError(`Connection failed: ${msg}`);
+        toast.error("Connection failed", { id: toastId, description: msg });
       }
     },
     [contextId, sessionId, startAnalysis, setPlan, updateTaskStatus, setResult, setError]
@@ -77,11 +82,16 @@ function handleEvent(
     updateTaskStatus: ReturnType<typeof useWorkspaceStore.getState>["updateTaskStatus"];
     setResult: ReturnType<typeof useWorkspaceStore.getState>["setResult"];
     setError: ReturnType<typeof useWorkspaceStore.getState>["setError"];
+    toastId: string | number;
   }
 ) {
   switch (evt.event) {
     case "plan":
       actions.setPlan(evt.data.intent, evt.data.graph);
+      toast.loading("Executing tasks…", {
+        id: actions.toastId,
+        description: evt.data.intent,
+      });
       break;
     case "task_start":
       actions.updateTaskStatus(evt.data.node_id, "running");
@@ -89,11 +99,28 @@ function handleEvent(
     case "task_complete":
       actions.updateTaskStatus(evt.data.node_id, evt.data.status, evt.data.duration_ms);
       break;
-    case "result":
+    case "result": {
       actions.setResult(evt.data);
+      const partial = evt.data.partial;
+      if (partial) {
+        toast.warning("Analysis complete with errors", {
+          id: actions.toastId,
+          description: "Some tasks failed — results may be incomplete.",
+        });
+      } else {
+        toast.success("Analysis complete", {
+          id: actions.toastId,
+          description: evt.data.intent,
+        });
+      }
       break;
+    }
     case "error":
       actions.setError(evt.data.detail);
+      toast.error("Analysis failed", {
+        id: actions.toastId,
+        description: evt.data.detail,
+      });
       break;
   }
 }

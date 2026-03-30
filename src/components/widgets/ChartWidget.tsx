@@ -62,7 +62,7 @@ export default function ChartWidget({ data }: ChartWidgetProps) {
   }, [data]);
 
   if (!parsed) {
-    return <p className="text-sm text-zinc-500 py-4 text-center">No chart data available.</p>;
+    return <p className="text-sm py-4 text-center" style={{ color: "var(--text-muted)" }}>No chart data available.</p>;
   }
 
   const { type, rows, xKey, yKeys } = parsed;
@@ -72,12 +72,12 @@ export default function ChartWidget({ data }: ChartWidgetProps) {
     margin: { top: 5, right: 20, left: 0, bottom: 5 },
   };
 
-  const axisStyle = { fill: "#71717a", fontSize: 11, fontFamily: "var(--font-geist-mono)" };
-  const gridStyle = { stroke: "#27272a", strokeDasharray: "3 3" };
+  const axisStyle = { fill: "var(--text-muted)", fontSize: 11, fontFamily: "var(--font-geist-mono)" };
+  const gridStyle = { stroke: "var(--border)", strokeDasharray: "3 3" };
   const tooltipStyle = {
-    contentStyle: { background: "#18181b", border: "1px solid #3f3f46", borderRadius: 8, fontSize: 12 },
-    labelStyle: { color: "#a1a1aa" },
-    itemStyle: { color: "#e4e4e7" },
+    contentStyle: { background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 },
+    labelStyle: { color: "var(--text-secondary)" },
+    itemStyle: { color: "var(--text-primary)" },
   };
 
   return (

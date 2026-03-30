@@ -1,39 +1,100 @@
 @import "tailwindcss";
 
+/* ── Dark theme (default) ─────────────────────────────────────────────────── */
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
+  --bg-base:        #09090b;
+  --bg-surface:     #18181b;
+  --bg-elevated:    #27272a;
+  --bg-sidebar:     #111113;
+  --border:         #3f3f46;
+  --border-subtle:  rgba(63,63,70,0.5);
+  --text-primary:   #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted:     #71717a;
+  --text-faint:     #52525b;
+  --shadow-sm:      0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:      0 4px 16px rgba(0,0,0,0.5);
+  --accent:         #06b6d4;
+}
+
+/* ── Light theme ──────────────────────────────────────────────────────────── */
+.light {
+  --bg-base:        #e8edf2;   /* cool grey page bg — clearly different from white */
+  --bg-surface:     #ffffff;
+  --bg-elevated:    #f0f4f8;   /* slightly tinted hover */
+  --bg-sidebar:     #f8fafc;   /* off-white sidebar */
+  --border:         #b0bec5;   /* medium grey — clearly visible */
+  --border-subtle:  #cfd8dc;
+  --text-primary:   #0d1117;   /* near-black — maximum readability */
+  --text-secondary: #1e293b;   /* dark slate */
+  --text-muted:     #475569;   /* medium slate */
+  --text-faint:     #78909c;   /* lighter */
+  --shadow-sm:      0 1px 4px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:      0 4px 16px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08);
+  --accent:         #0891b2;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 html, body {
   height: 100%;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* React Flow overrides */
+/* ── Sidebar depth ────────────────────────────────────────────────────────── */
+.light aside {
+  box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+  border-right: 1px solid var(--border) !important;
+}
+
+/* ── Dataset panel depth ──────────────────────────────────────────────────── */
+.light [data-panel] {
+  box-shadow: -6px 0 24px rgba(0,0,0,0.10);
+}
+
+/* ── React Flow ───────────────────────────────────────────────────────────── */
 .react-flow__controls button {
-  background: #18181b !important;
-  border-color: #3f3f46 !important;
-  color: #a1a1aa !important;
+  background: var(--bg-surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 .react-flow__controls button:hover {
-  background: #27272a !important;
-  color: #e4e4e7 !important;
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+}
+.react-flow__background { background: var(--bg-base) !important; }
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+/* ── Highlight.js ─────────────────────────────────────────────────────────── */
+.hljs { background: var(--bg-surface) !important; border-radius: 8px; }
+
+/* ── Sonner toasts ────────────────────────────────────────────────────────── */
+.light [data-sonner-toaster] [data-sonner-toast] {
+  background: #ffffff !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #52525b; }
+/* ── Light mode: section labels uppercase ─────────────────────────────────── */
+.light .section-label {
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
 
-/* Highlight.js dark theme adjustments */
-.hljs { background: #18181b !important; border-radius: 8px; }
+/* ── Light mode: table rows ───────────────────────────────────────────────── */
+.light table thead tr {
+  background: var(--bg-elevated) !important;
+}

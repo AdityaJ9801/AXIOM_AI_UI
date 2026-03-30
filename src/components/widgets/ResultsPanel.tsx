@@ -1,6 +1,8 @@
 "use client";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, SkipForward, Clock, AlertTriangle } from "lucide-react";
+import { CheckCircle, XCircle, SkipForward, Clock } from "lucide-react";
+import { toast } from "sonner";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import type { TaskResult } from "@/types/axiom";
 import DataTableWidget from "./DataTableWidget";
@@ -85,8 +87,9 @@ function TaskResultCard({ taskResult }: { taskResult: TaskResult }) {
       </div>
 
       {taskResult.status === "failed" && taskResult.error && (
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-          <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 p-3 rounded-lg"
+          style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+          <XCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-red-300 font-mono">{taskResult.error}</p>
         </div>
       )}
@@ -97,7 +100,8 @@ function TaskResultCard({ taskResult }: { taskResult: TaskResult }) {
           {showTable && <DataTableWidget data={taskResult.result} />}
           {text && !showChart && !showTable && <MarkdownReport content={text} />}
           {!showChart && !showTable && !text && taskResult.result && (
-            <pre className="text-xs text-zinc-400 font-mono bg-zinc-900 rounded-lg p-3 overflow-x-auto">
+            <pre className="text-xs font-mono rounded-lg p-3 overflow-x-auto"
+              style={{ background: "var(--bg-surface)", color: "var(--text-secondary)" }}>
               {JSON.stringify(taskResult.result, null, 2)}
             </pre>
           )}
@@ -110,6 +114,15 @@ function TaskResultCard({ taskResult }: { taskResult: TaskResult }) {
 export default function ResultsPanel() {
   const { phase, finalResponse, intent, errorMessage } = useWorkspaceStore();
 
+  // Toast for agent-level task failures within a completed run
+  useEffect(() => {
+    if (!finalResponse) return;
+    const failed = finalResponse.results.filter((r) => r.status === "failed");
+    failed.forEach((r) => {
+      toast.error(`${r.agent} agent failed`, { description: r.error ?? "Unknown error" });
+    });
+  }, [finalResponse]);
+
   if (phase === "idle") return null;
 
   return (
@@ -119,19 +132,20 @@ export default function ResultsPanel() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="px-4 py-3 rounded-xl bg-zinc-900/60 border border-zinc-800"
+          className="px-4 py-3 rounded-xl"
+          style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}
         >
-          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Analysis Intent</p>
-          <p className="text-sm text-zinc-200">{intent}</p>
+          <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>Analysis Intent</p>
+          <p className="text-sm" style={{ color: "var(--text-primary)" }}>{intent}</p>
         </motion.div>
       )}
 
-      {/* Error state */}
       {phase === "error" && errorMessage && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/30"
+          className="flex items-start gap-3 p-4 rounded-xl"
+          style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)" }}
         >
           <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
           <div>
@@ -139,14 +153,6 @@ export default function ResultsPanel() {
             <p className="text-xs text-red-400/80 mt-1 font-mono">{errorMessage}</p>
           </div>
         </motion.div>
-      )}
-
-      {/* Partial warning */}
-      {finalResponse?.partial && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
-          <AlertTriangle className="w-4 h-4 text-amber-400" />
-          <p className="text-xs text-amber-300">Some tasks failed — results may be incomplete.</p>
-        </div>
       )}
 
       {/* Task results */}

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Square, Sparkles } from "lucide-react";
+import { Send, Loader2, Sparkles } from "lucide-react";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import { useOrchestratorSSE } from "@/hooks/useOrchestratorSSE";
 import clsx from "clsx";
@@ -19,7 +19,6 @@ export default function CommandBar() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { phase } = useWorkspaceStore();
   const { submit } = useOrchestratorSSE();
-
   const isRunning = phase === "planning" || phase === "executing";
 
   useEffect(() => {
@@ -28,6 +27,14 @@ export default function CommandBar() {
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
     }
   }, [query]);
+
+  useEffect(() => {
+    function handleFocusCommand() {
+      textareaRef.current?.focus();
+    }
+    window.addEventListener("axiom:focus-command", handleFocusCommand);
+    return () => window.removeEventListener("axiom:focus-command", handleFocusCommand);
+  }, []);
 
   function handleSubmit() {
     const q = query.trim();
@@ -46,17 +53,18 @@ export default function CommandBar() {
 
   return (
     <div className="relative px-4 pb-4 pt-2">
-      {/* Suggestions */}
+      {/* Suggestions dropdown */}
       <AnimatePresence>
         {showSuggestions && query.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            className="absolute bottom-full left-4 right-4 mb-2 bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-2xl"
+            className="absolute bottom-full left-4 right-4 mb-2 rounded-xl overflow-hidden shadow-2xl"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}
           >
-            <div className="px-3 py-2 border-b border-zinc-800">
-              <span className="text-xs text-zinc-500 flex items-center gap-1.5">
+            <div className="px-3 py-2" style={{ borderBottom: "1px solid var(--border)" }}>
+              <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
                 <Sparkles className="w-3 h-3" /> Suggested queries
               </span>
             </div>
@@ -64,7 +72,13 @@ export default function CommandBar() {
               <button
                 key={s}
                 onClick={() => { setQuery(s); setShowSuggestions(false); textareaRef.current?.focus(); }}
-                className="w-full text-left px-3 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors border-b border-zinc-800/50 last:border-0"
+                className="w-full text-left px-3 py-2.5 text-sm transition-colors"
+                style={{
+                  color: "var(--text-secondary)",
+                  borderBottom: "1px solid var(--border-subtle)",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
                 {s}
               </button>
@@ -77,15 +91,13 @@ export default function CommandBar() {
       <motion.div
         animate={{ scale: isRunning ? 0.99 : 1 }}
         transition={{ duration: 0.2 }}
-        className={clsx(
-          "relative flex items-end gap-3 px-4 py-3 rounded-2xl border transition-all duration-300",
-          "bg-zinc-900/80 backdrop-blur-xl shadow-2xl",
-          isRunning
-            ? "border-cyan-500/50 shadow-cyan-500/10"
-            : "border-zinc-700 hover:border-zinc-600 focus-within:border-cyan-500/60 focus-within:shadow-cyan-500/10"
-        )}
+        className="relative flex items-end gap-3 px-4 py-3 rounded-2xl transition-all duration-300 backdrop-blur-xl"
+        style={{
+          background: "var(--bg-surface)",
+          border: `1px solid ${isRunning ? "rgba(0,229,255,0.5)" : "var(--border)"}`,
+          boxShadow: isRunning ? "0 0 20px rgba(0,229,255,0.1)" : "var(--shadow-md)",
+        }}
       >
-        {/* Animated glow when running */}
         {isRunning && (
           <motion.div
             className="absolute inset-0 rounded-2xl pointer-events-none"
@@ -105,12 +117,8 @@ export default function CommandBar() {
           placeholder={isRunning ? "Analyzing…" : "Ask anything about your data…"}
           disabled={isRunning}
           rows={1}
-          className={clsx(
-            "flex-1 bg-transparent resize-none outline-none text-sm leading-relaxed",
-            "placeholder:text-zinc-600 text-zinc-100",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
-            "max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700"
-          )}
+          className="flex-1 bg-transparent resize-none outline-none text-sm leading-relaxed max-h-40 overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ color: "var(--text-primary)" }}
         />
 
         <button
@@ -120,18 +128,15 @@ export default function CommandBar() {
             "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
             query.trim() && !isRunning
               ? "bg-cyan-500 hover:bg-cyan-400 text-black shadow-lg shadow-cyan-500/30"
-              : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
+              : "cursor-not-allowed"
           )}
+          style={!query.trim() || isRunning ? { background: "var(--bg-elevated)", color: "var(--text-faint)" } : {}}
         >
-          {isRunning ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Send className="w-4 h-4" />
-          )}
+          {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>
       </motion.div>
 
-      <p className="text-center text-xs text-zinc-700 mt-2">
+      <p className="text-center text-xs mt-2" style={{ color: "var(--text-faint)" }}>
         Shift+Enter for new line · Enter to submit
       </p>
     </div>

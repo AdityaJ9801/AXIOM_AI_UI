@@ -26,8 +26,8 @@ export default function PlanningState() {
         ))}
       </div>
       <div className="text-center">
-        <p className="text-sm font-medium text-zinc-300">Planning analysis…</p>
-        <p className="text-xs text-zinc-600 mt-1 max-w-xs truncate">"{currentQuery}"</p>
+        <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Planning analysis…</p>
+        <p className="text-xs mt-1 max-w-xs truncate" style={{ color: "var(--text-faint)" }}>"{currentQuery}"</p>
       </div>
     </motion.div>
   );
